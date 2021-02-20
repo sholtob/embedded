@@ -17,12 +17,13 @@ int sIn = 90; //stores serial position
 
 void setup() {
   Serial.begin(9600);
-  myservo.attach(10);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(8);  // attaches the servo on pin 9 to the servo object
 
 }
 
 void loop() {
   sIn = Serial.parseInt();
+  Serial.println(sIn);
   if (sIn != 0) pos = sIn;
   myservo.write(pos);
 }
