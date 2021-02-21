@@ -9,8 +9,9 @@
 #include <math.h>
 
 // Define the lengths of leg segments squared for inverse kinematics:
-#define L1 20
-#define L2 30
+#define L1 20.
+#define L2 30.
+#define N 20 // number of points foot position calculated at. 
 
 
 Scara::Scara(int frontServoPin, int backServoPin)
@@ -27,6 +28,51 @@ void Scara::init() {
   radius = 30; //Sets legs initial length.
   theta = 90; // Sets leg inital angle in degrees.
 }
+
+void Scara::initStride(float l, float h, float v) {
+ /* calculates variables needed when robot takes a step.
+  * l is distance over which the foot touches the floor, 
+  * h is height of robot above the floor,
+  * v is robots velocity.
+  */
+  _T = int(round(l/(N*v)));
+  _h = h;
+  _dPerStep = l/N;
+  _lOn2 = l/2;
+  _angle0 = int(round(cartToTheta(_lOn2, h-10))); //y part might not be high enough if h is small.
+  _rad0 = cartToRad(_lOn2, h-10);
+}
+
+void Scara::stride() {
+  /* A step is taken each time this function is called.
+  */
+  movePolar(_rad0, _angle0);
+  // Foot on floor portion:
+  // y is constant, equal to h
+  for (int i=0; i<N; i++) {
+   float x = _lOn2 - i*_dPerStep;
+   angle = int(round(cartToTheta(x, _h)));
+   radius = cartToRad(x, _h);
+   movePolar(radius, angle);
+//    Serial.print("angle ");
+//    Serial.println(angle);
+//    Serial.print("radius ");
+//    Serial.println(radius);
+    delay(T);
+   }
+   
+  //raise foot so it leaves the ground by reducing radius
+  radius -= 5;
+  movePolar(radius, angle);
+  delay(T);
+
+  // move back to centre of travel
+  movePolar(15, 90);
+  delay (T);
+}
+
+
+
 
 void Scara::angleAWrite(int thetaA) {
   /* takes angle theta referenced to horizon, 
@@ -49,7 +95,7 @@ void Scara::angleBWrite(int thetaB) {
    int posFrame = 225 - thetaB;
    if (posFrame > 0 && posFrame < 170 && posB - posA > 20) {
       _servoB.write(posFrame);
-      Serial.println(posFrame);
+      //Serial.println(posFrame);
    }
    else { 
       Serial.print(thetaB);
@@ -57,10 +103,18 @@ void Scara::angleBWrite(int thetaB) {
    }
 }
 
-void Scara::legWrite() {
+void Scara::movePolar(float rad, int angle) {
   /* Moves the servos to the positions stored
    * in posA and posB
    */
+  radius = rad;
+  theta = angle;
+
+  //Calculate motor positions for given leg radius:
+  legLength(radius);
+  // Calculate motor positions so leg has given angle:
+  legAngle(angle);
+
   angleAWrite(posA);
   angleBWrite(posB);
 }
@@ -78,9 +132,9 @@ void Scara::legAngle(int angle) {
    //angleBWrite(posB);
 }
 
-void Scara::legLength(int rad) {
+void Scara::legLength(float rad) {
   
-  int gamma = int(round(acos(float((L1*L1 - L2*L2 +rad*rad))/float((2*L1*rad)))*180./M_PI));
+  int gamma = int(round(acos((L1*L1 - L2*L2 +rad*rad)/(2.*L1*rad))*180./M_PI));
   //Serial.print("gamma ");
   //Serial.println(acos(float((L1*L1 - L2*L2 +rad*rad))/float((2*L1*rad))));
   posA = theta - gamma;
@@ -89,4 +143,13 @@ void Scara::legLength(int rad) {
   //angleBWrite(posB);
 }
 
+float Scara::cartToRad(float x, float y) {
+  //Converts cartesian x, y coords to polar radius.
+  return sqrt(x*x + y*y);
+}
 
+float Scara::cartToTheta(float x, float y) {
+  // Converts cartesian x, y coordinates to polar angle.
+  // +x is in front of the hip joint, +y is below it.
+  return atan2(y, x)*180./M_PI;
+}
