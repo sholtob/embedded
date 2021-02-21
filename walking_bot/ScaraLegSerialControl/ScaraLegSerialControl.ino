@@ -39,11 +39,11 @@ void loop() {
   Serial.println(sIn);
   if (sIn != 0) {
     radius = sIn;
-    setRadius(radius);
+    legLengthWrite(radius);
   }
 }
 
-void setAngleA(int thetaA) {
+void angleAWrite(int thetaA) {
   /* takes angle theta referenced to horizon, 
    * then transforms it to frame of servoA and sends. 
    */
@@ -57,7 +57,7 @@ void setAngleA(int thetaA) {
    }
 }
 
-void setAngleB(int thetaB) {
+void angleBWrite(int thetaB) {
   /* takes angle theta referenced to horizon, 
    * then transforms it to frame of servoB and sends. 
    */
@@ -71,7 +71,7 @@ void setAngleB(int thetaB) {
    }
 }
 
-void setTheta(int angle) {
+void legAngleWrite(int angle) {
   /* This sets the angle of imaginary line 
    *connecting motor axles to foor pivot.
    * Theta referenced to robot body horizontal plane.
@@ -79,17 +79,17 @@ void setTheta(int angle) {
    int legOffset = int(round(float((posB - posA)/2.)));
    posA = angle - legOffset;
    posB = angle + legOffset;
-   setAngleA(posA);
-   setAngleB(posB);
+   angleAWrite(posA);
+   angleBWrite(posB);
 }
 
-void setRadius(int rad) {
+void legLengthWrite(int rad) {
   
   int gamma = int(round(acos(float((L1*L1 - L2*L2 +rad*rad))/float((2*L1*rad)))*180./M_PI));
   //Serial.print("gamma ");
   //Serial.println(acos(float((L1*L1 - L2*L2 +rad*rad))/float((2*L1*rad))));
   posA = theta - gamma;
   posB = theta + gamma;
-  setAngleA(posA);
-  setAngleB(posB);
+  angleAWrite(posA);
+  angleBWrite(posB);
 }
