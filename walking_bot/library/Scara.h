@@ -36,7 +36,8 @@ class Scara
     float _dPerStep; //Distance between each calculated point n walk cycle.
     float _h; // length of leg when foot is on the floor.
     int _angle0; //angle of leg just before foot touches the floor.
-    int _rad0 // length of leg just before foot touches the floor.
+    int _rad0; // length of leg just before foot touches the floor.
+    float _lOn2;
 };
 
 #endif

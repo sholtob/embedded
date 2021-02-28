@@ -9,10 +9,10 @@
 #include <math.h>
 
 // Define the lengths of leg segments squared for inverse kinematics:
-#define L1 20.
+#define L1 23.
 #define L2 30.
-#define N 20 // number of points foot position calculated at. 
-
+#define N 200 // number of points foot position calculated at. 
+#define WALK_T 100 // times between large walk distances.
 
 Scara::Scara(int frontServoPin, int backServoPin)
   {  
@@ -47,28 +47,29 @@ void Scara::stride() {
   /* A step is taken each time this function is called.
   */
   movePolar(_rad0, _angle0);
+  delay(WALK_T);
   // Foot on floor portion:
   // y is constant, equal to h
   for (int i=0; i<N; i++) {
    float x = _lOn2 - i*_dPerStep;
-   angle = int(round(cartToTheta(x, _h)));
+   theta = int(round(cartToTheta(x, _h)));
    radius = cartToRad(x, _h);
-   movePolar(radius, angle);
+   movePolar(radius, theta);
 //    Serial.print("angle ");
 //    Serial.println(angle);
 //    Serial.print("radius ");
 //    Serial.println(radius);
-    delay(T);
+    delay(_T);
    }
    
   //raise foot so it leaves the ground by reducing radius
-  radius -= 5;
-  movePolar(radius, angle);
-  delay(T);
+  radius -= 4;
+  movePolar(radius, theta);
+  delay(WALK_T/5);
 
   // move back to centre of travel
   movePolar(15, 90);
-  delay (T);
+  delay(WALK_T);
 }
 
 
