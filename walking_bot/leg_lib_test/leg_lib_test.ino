@@ -5,7 +5,7 @@
 #define DEL 500
 #define N 20 // number of points foot moves to in each leg portion.
 
-Scara sc(9, 8);
+Scara sc(3, 2);
 
 int sIn = 90; //stores serial position
 

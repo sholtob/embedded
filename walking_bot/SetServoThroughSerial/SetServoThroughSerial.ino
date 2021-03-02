@@ -13,7 +13,7 @@ int sIn = 90; //stores serial position
 
 void setup() {
   Serial.begin(9600);
-  myservo.attach(8);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
 
 }
 

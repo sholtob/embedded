@@ -11,7 +11,7 @@
 // Define the lengths of leg segments squared for inverse kinematics:
 #define L1 23.
 #define L2 30.
-#define N 200 // number of points foot position calculated at. 
+#define N 100 // number of points foot position calculated at. 
 #define WALK_T 100 // times between large walk distances.
 
 Scara::Scara(int frontServoPin, int backServoPin)
@@ -43,6 +43,34 @@ void Scara::initStride(float l, float h, float v) {
   _rad0 = cartToRad(_lOn2, h-10);
 }
 
+void Scara::strideStep(int i) {
+  if (i == 0) {
+    movePolar(_rad0, _angle0);
+  //  delay(WALK_T);
+  }
+
+  if (0<i && i<N) {
+    float x = _lOn2 - i*_dPerStep;
+    theta = int(round(cartToTheta(x, _h)));
+    radius = cartToRad(x, _h);
+    movePolar(radius, theta);
+    //delay(_T);
+  }
+
+  if (i==N) {
+    //raise foot so it leaves the ground by reducing radius
+    radius -= 4;
+    movePolar(radius, theta);
+    //delay(WALK_T/5);
+  }
+
+  if (i>N) {
+    // move back to centre of travel
+    movePolar(15, 90);
+    //delay(WALK_T);
+  }
+}
+
 void Scara::stride() {
   /* A step is taken each time this function is called.
   */
@@ -71,8 +99,6 @@ void Scara::stride() {
   movePolar(15, 90);
   delay(WALK_T);
 }
-
-
 
 
 void Scara::angleAWrite(int thetaA) {
